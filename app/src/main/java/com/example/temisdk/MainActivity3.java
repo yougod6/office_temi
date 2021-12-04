@@ -20,6 +20,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.robotemi.sdk.Robot;
 import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener;
 
+import java.util.Map;
+
 
 public class MainActivity3 extends AppCompatActivity implements
         OnGoToLocationStatusChangedListener {
@@ -36,7 +38,10 @@ public class MainActivity3 extends AppCompatActivity implements
     static final String TEMI1 = "00120485035";
     static final String TEMI2 = "00120474994";
     static final String TEMI3 = "00120485020";
-
+    static final Float ON = 100F;
+    static final Float OFF= -100F;
+    public String id = ((Prob)Prob.context).id;
+    public Map<String, Float> temi_list = ((Prob)Prob.context).temi_list;
 
     final RoboTemi roboTemi = new RoboTemi();
 
@@ -55,6 +60,7 @@ public class MainActivity3 extends AppCompatActivity implements
         buttonBack = findViewById(R.id.buttonBack);
         actionText= (TextView)findViewById(R.id.action1);
 
+        temi_list.put(id,OFF);
 
 
         robot = Robot.getInstance();
@@ -152,8 +158,22 @@ public class MainActivity3 extends AppCompatActivity implements
         if(s1.equals(OnGoToLocationStatusChangedListener.COMPLETE)) {
             roboTemi.speak(s+"에 도착했습니다");
             actionText.setText(s);
-            //databaseReference.child("action").setValue("start");
+            temi_list.put(id,ON);
 
+            if(id.equals(TEMI1)){
+                databaseReference.child("distance1").setValue(ON);
+            }
+            else if(id.equals(TEMI2)){
+                databaseReference.child("distance2").setValue(ON);
+            }
+            else if(id.equals(TEMI3)){
+                databaseReference.child("distance3").setValue(ON);
+            }
+            //Intent intent = new Intent(getApplicationContext(),Prob.class);
+            //startActivity(intent);
+
+            finish();
+            //databaseReference.child("action").setValue("start");
         }
     }
 
