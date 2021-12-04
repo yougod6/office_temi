@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">TemiSDK</string>
+    <string name="newIntent">예제창</string>
+    <string name="placehold">장소명을 입력해주세요</string>
+    <string name="saveplace">장소 이름 저장</string>
+</resources>
