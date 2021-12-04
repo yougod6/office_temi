@@ -51,8 +51,10 @@ public class Prob extends AppCompatActivity implements
     public List<String> map_list;
     public int index;
     public Map<String, Float> temi_list = new HashMap<>();
-    public Map.Entry<String, Float> min = null;
-    boolean b =true;
+    boolean b =false;
+    boolean c1 =false;
+    boolean c2 =false;
+    boolean c3 =false;
 
     final RoboTemi roboTemi = new RoboTemi();
     public static Context context;
@@ -73,21 +75,17 @@ public class Prob extends AppCompatActivity implements
         map_list = robot.getLocations();
 
         if(id.equals(TEMI1))
-            roboTemi.goTo("prob11");
+            roboTemi.goTo("prob21");
         else if(id.equals(TEMI2))
             roboTemi.goTo("prob21");
         else if(id.equals(TEMI3))
-            roboTemi.goTo("prob31");
+            roboTemi.goTo("prob21");
 
         firebaseDatabase.getReference("action").addValueEventListener(new ValueEventListener() {
             //@SuppressLint("SetTextI18n")
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Object myText = snapshot.getValue();
-                if (myText != null) {
-                    loc=myText.toString();
-                    Log.d("tag", "action is " + myText);
-                }
                 // o = Objects.requireNonNull(myText);
                 if(myText!=null){
                     if ("point1".equals(myText.toString())) {
@@ -106,6 +104,7 @@ public class Prob extends AppCompatActivity implements
                         b=true;
                     }
                     else if("stop".equals(myText.toString())){
+                        roboTemi.stopMovement();
                         finish();
                     }
                 }
@@ -120,10 +119,9 @@ public class Prob extends AppCompatActivity implements
         firebaseDatabase.getReference("distance1").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(id.equals(TEMI1)){
                     Float dist = Float.parseFloat(snapshot.getValue().toString());
-                    temi_list.put(id,dist);
-                }
+                    temi_list.put(TEMI1,dist);
+                    c1=true;
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -134,11 +132,9 @@ public class Prob extends AppCompatActivity implements
         firebaseDatabase.getReference("distance2").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(id.equals(TEMI2)){
                     Float dist = Float.parseFloat(snapshot.getValue().toString());
-                    temi_list.put(id,dist);
-                }
-
+                    temi_list.put(TEMI2,dist);
+                    c2=true;
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -149,11 +145,9 @@ public class Prob extends AppCompatActivity implements
         firebaseDatabase.getReference("distance3").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(id.equals(TEMI3)){
                     Float dist = Float.parseFloat(snapshot.getValue().toString());
-                    temi_list.put(id,dist);
-                }
-
+                    temi_list.put(TEMI3,dist);
+                    c3=true;
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -293,26 +287,43 @@ public class Prob extends AppCompatActivity implements
             else if(id.equals(TEMI3))
                 databaseReference.child("distance3").setValue(dist);
 
-            boolean a=true;
-            Set<Entry<String, Float>> entrySet = temi_list.entrySet();
-            for (Entry<String, Float> entry : entrySet) {
-                if(a){
-                    min=entry;
-                    a=false;
+            // distance 1, 2, 3 are changed
+            if(c1 && c2 && c3){
+                boolean a=true;
+                Map.Entry<String, Float> min = null;
+                Set<Entry<String, Float>> entrySet = temi_list.entrySet();
+                for (Entry<String, Float> entry : entrySet) {
+                    if(entry.getValue()>0){
+                        // for don't refer to null val
+                        if(a){
+                            min=entry;
+                            a=false;
+                        }
+                        // find min val'
+                        Log.d("getValue", "entryValue"+String.valueOf(entry.getValue())+" < minVal"+String.valueOf(min.getValue()));
+                        if (entry.getValue() < min.getValue()) {
+                            min = entry;
+                            Log.d("min", String.valueOf(min.getValue()));
+                            Log.d("minKey", String.valueOf(min.getKey()));
+                        }
+                    }
+
                 }
-                if (entry.getValue() < min.getValue()) {
-                    min = entry;
+                c1 =false;
+                c2 =false;
+                c3 =false;
+                Log.d("equal?", String.valueOf(min.getKey().equals(id))+"     "+String.valueOf(min.getKey())+"          "+String.valueOf(id));
+                if(min.getKey().equals(id)){
+                    Log.d("min", "I'm in min.getkey == equal");
+                    Intent intent = new Intent(getApplicationContext(),MainActivity3.class);
+                    startActivity(intent);
+                    temi_list.put(id,OFF);
+                    finish();
                 }
-            }
-            if(min.getKey().equals(id)){
-                finish();
-                Intent intent = new Intent(getApplicationContext(),MainActivity3.class);
-                startActivity(intent);
+                else{Log.d("alksjdla","Siibal");}
             }
 
         }
-
-
         //System.out.println(min);
 
 

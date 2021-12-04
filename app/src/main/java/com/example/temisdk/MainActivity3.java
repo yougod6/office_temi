@@ -77,10 +77,9 @@ public class MainActivity3 extends AppCompatActivity implements
                         roboTemi.goTo("point4");
                     }
                     else if("start".equals(myText.toString())){
-                        setContentView(R.layout.prob);
-                        finish();
                         Intent intent = new Intent(getApplicationContext(),Prob.class);
                         startActivity(intent);
+                        finish();
                     }
                 }
 
@@ -153,7 +152,8 @@ public class MainActivity3 extends AppCompatActivity implements
         if(s1.equals(OnGoToLocationStatusChangedListener.COMPLETE)) {
             roboTemi.speak(s+"에 도착했습니다");
             actionText.setText(s);
-            databaseReference.child("action").setValue("start");
+            //databaseReference.child("action").setValue("start");
+
         }
     }
 
