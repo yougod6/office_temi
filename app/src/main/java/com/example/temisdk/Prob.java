@@ -51,13 +51,13 @@ public class Prob extends AppCompatActivity implements
     public List<String> map_list;
     public int index;
     public Map<String, Float> temi_list = new HashMap<>();
+    public static Context context;
     boolean b =false;
     boolean c1 =false;
     boolean c2 =false;
     boolean c3 =false;
 
     final RoboTemi roboTemi = new RoboTemi();
-    public static Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,9 +77,11 @@ public class Prob extends AppCompatActivity implements
         if(id.equals(TEMI1))
             roboTemi.goTo("prob21");
         else if(id.equals(TEMI2))
-            roboTemi.goTo("prob21");
+            roboTemi.goTo("prob22");
         else if(id.equals(TEMI3))
-            roboTemi.goTo("prob21");
+            roboTemi.goTo("prob23");
+
+
 
         firebaseDatabase.getReference("action").addValueEventListener(new ValueEventListener() {
             //@SuppressLint("SetTextI18n")
@@ -121,6 +123,7 @@ public class Prob extends AppCompatActivity implements
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                     Float dist = Float.parseFloat(snapshot.getValue().toString());
                     temi_list.put(TEMI1,dist);
+                    Log.d("c1", String.valueOf(dist));
                     c1=true;
             }
             @Override
@@ -134,6 +137,7 @@ public class Prob extends AppCompatActivity implements
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                     Float dist = Float.parseFloat(snapshot.getValue().toString());
                     temi_list.put(TEMI2,dist);
+                    Log.d("c2", String.valueOf(dist));
                     c2=true;
             }
             @Override
@@ -147,6 +151,7 @@ public class Prob extends AppCompatActivity implements
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                     Float dist = Float.parseFloat(snapshot.getValue().toString());
                     temi_list.put(TEMI3,dist);
+                    Log.d("c3", String.valueOf(dist));
                     c3=true;
             }
             @Override
@@ -154,24 +159,6 @@ public class Prob extends AppCompatActivity implements
                 Log.w("tag", "Fail to read value.", error.toException());
             }
         });
-
-
-
-
-        //    robot.setKioskModeOn(true);
-        /*prob_start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                id = robot.getSerialNumber();
-                if(id.equals(TEMI1))
-                    roboTemi.goTo("prob11");
-                else if(id.equals(TEMI2))
-                    roboTemi.goTo("prob21");
-                else if(id.equals(TEMI3))
-                    roboTemi.goTo("prob31");
-                //robot.toggleNavigationBillboard(true);
-            }
-        });*/
 
     }
 
@@ -280,12 +267,23 @@ public class Prob extends AppCompatActivity implements
                 temi_list.put(id,dist);
 
             // Send distance to firebase
-            if(id.equals(TEMI1))
+            if(id.equals(TEMI1)&&temi_list.get(TEMI1)>0){
                 databaseReference.child("distance1").setValue(dist);
-            else if(id.equals(TEMI2))
+            }
+            else if(id.equals(TEMI2)&&temi_list.get(TEMI2)>0){
                 databaseReference.child("distance2").setValue(dist);
-            else if(id.equals(TEMI3))
+            }
+            else if(id.equals(TEMI3)&&temi_list.get(TEMI3)>0){
                 databaseReference.child("distance3").setValue(dist);
+            }
+
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
 
             // distance 1, 2, 3 are changed
             if(c1 && c2 && c3){
@@ -307,18 +305,29 @@ public class Prob extends AppCompatActivity implements
                             Log.d("minKey", String.valueOf(min.getKey()));
                         }
                     }
-
                 }
-                c1 =false;
-                c2 =false;
-                c3 =false;
+
+ //               c1 =false;
+ //               c2 =false;
+ //               c3 =false;
+
                 Log.d("equal?", String.valueOf(min.getKey().equals(id))+"     "+String.valueOf(min.getKey())+"          "+String.valueOf(id));
                 if(min.getKey().equals(id)){
                     Log.d("min", "I'm in min.getkey == equal");
+                    temi_list.put(id,OFF);
+
+                    /*if(id.equals(TEMI1)){
+                        databaseReference.child("distance1").setValue(OFF);
+                    }
+                    else if(id.equals(TEMI2)){
+                        databaseReference.child("distance2").setValue(OFF);
+                    }
+                    else if(id.equals(TEMI3)){
+                        databaseReference.child("distance3").setValue(OFF);
+                    }*/
                     Intent intent = new Intent(getApplicationContext(),MainActivity3.class);
                     startActivity(intent);
-                    temi_list.put(id,OFF);
-                    finish();
+                    //finish();
                 }
                 else{Log.d("alksjdla","Siibal");}
             }
