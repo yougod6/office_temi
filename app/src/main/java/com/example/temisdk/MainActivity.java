@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements
         prob.setOnClickListener(this);
 
 
-        firebaseDatabase.getReference("action").addValueEventListener(new ValueEventListener() {
+        firebaseDatabase.getReference("location").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Object myText = snapshot.getValue();

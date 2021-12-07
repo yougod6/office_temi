@@ -1,9 +1,6 @@
 package com.example.temisdk;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -12,13 +9,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.temisdk.temi.RoboTemi;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.example.temisdk.temi.TemiList;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.robotemi.sdk.Robot;
 import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener;
+
+import java.util.Map;
 
 
 public class MainActivity3 extends AppCompatActivity implements
@@ -33,11 +30,16 @@ public class MainActivity3 extends AppCompatActivity implements
     Button buttonBack;
     TextView actionText;
     Robot robot;
+
     static final String TEMI1 = "00120485035";
     static final String TEMI2 = "00120474994";
     static final String TEMI3 = "00120485020";
-
-
+    static final Float WORKING = 1000F;
+    static final Float WORKABLE = 10F;
+    public String id = ((Prob)Prob.context).id;
+    public Map<String, Float> temi_list = ((Prob)Prob.context).temi_list;
+    public String loc;
+    public TemiList temiList = ((Prob)Prob.context).temiList;
     final RoboTemi roboTemi = new RoboTemi();
 
 
@@ -56,9 +58,10 @@ public class MainActivity3 extends AppCompatActivity implements
         actionText= (TextView)findViewById(R.id.action1);
 
 
-
         robot = Robot.getInstance();
-        firebaseDatabase.getReference("action").addValueEventListener(new ValueEventListener() {
+        id = robot.getSerialNumber();
+
+        /*firebaseDatabase.getReference("location").addValueEventListener(new ValueEventListener() {
             @SuppressLint("SetTextI18n")
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -77,18 +80,17 @@ public class MainActivity3 extends AppCompatActivity implements
                         roboTemi.goTo("point4");
                     }
                     else if("start".equals(myText.toString())){
-                        Intent intent = new Intent(getApplicationContext(),Prob.class);
-                        startActivity(intent);
                         finish();
                     }
                 }
-
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.w("tag", "Fail to read value.", error.toException());
             }
         });
+
+         */
 
         gotoPosition1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,7 +132,17 @@ public class MainActivity3 extends AppCompatActivity implements
                 finish();
             }
         });
+        loc = temiList.getLocation();
+        roboTemi.goTo(loc);
+        if (id.equals(TEMI1))
+            databaseReference.child("distance1").setValue(WORKING);
+        else if (id.equals(TEMI2))
+            databaseReference.child("distance2").setValue(WORKING);
+        else if (id.equals(TEMI3))
+            databaseReference.child("distance3").setValue(WORKING);
     }
+
+
 
     @Override
     protected void onStart() {
@@ -150,13 +162,28 @@ public class MainActivity3 extends AppCompatActivity implements
     public void onGoToLocationStatusChanged(@NonNull String s, @NonNull String s1, int i, @NonNull String s2) {
 
         if(s1.equals(OnGoToLocationStatusChangedListener.COMPLETE)) {
-            roboTemi.speak(s+"에 도착했습니다");
+            roboTemi.speak(s + "에 도착했습니다");
             actionText.setText(s);
-            //databaseReference.child("action").setValue("start");
-
+            if (id.equals(TEMI1)) {
+                databaseReference.child("distance1").setValue(WORKABLE);
+                temi_list.put(TEMI1,WORKABLE);
+                roboTemi.goTo("prob11");
+                finish();
+            } else if (id.equals(TEMI2)) {
+                databaseReference.child("distance2").setValue(WORKABLE);
+                temi_list.put(TEMI2,WORKABLE);
+                roboTemi.goTo("prob31");
+                finish();
+            } else if (id.equals(TEMI3)) {
+                databaseReference.child("distance3").setValue(WORKABLE);
+                temi_list.put(TEMI3,WORKABLE);
+                roboTemi.goTo("prob31");
+                finish();
+            }
         }
+            else if(s1.equals(OnGoToLocationStatusChangedListener.START)){
+                // set FB distance value to 100F
+
+            }
     }
-
-
-    }
-
+}
